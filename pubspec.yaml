@@ -17,6 +17,7 @@ dependencies:
   reflectable: any
   build_runner: ^2.1.11
   shared_preferences: ^2.0.15
+  json_serializable:
 
 dev_dependencies:
   flutter_test:
