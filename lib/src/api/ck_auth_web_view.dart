@@ -20,12 +20,13 @@ class CKAuthWebView extends StatefulWidget
 
 class _CKAuthWebViewState extends State<CKAuthWebView>
 {
+  late WebViewController _controller;
   @override
   void initState()
   {
     super.initState();
     // Enable hybrid composition, as detailed in https://pub.dev/packages/webview_flutter
-    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    _controller = WebViewController()..setJavaScriptMode(JavaScriptMode.unrestricted)..loadRequest(Uri.parse(widget.authenticationURL));
   }
 
   @override
@@ -40,11 +41,8 @@ class _CKAuthWebViewState extends State<CKAuthWebView>
         title: Text(widget.title),
       ),
       body: Builder(builder: (BuildContext context) {
-        return WebView(
-          initialUrl: widget.authenticationURL,
-          javascriptMode: JavascriptMode.unrestricted,
-          navigationDelegate: (NavigationRequest request) {
-            if (request.url.startsWith(widget.redirectURLPattern))
+        return WebViewWidget(controller: _controller..setNavigationDelegate(NavigationDelegate(onNavigationRequest: (NavigationRequest request){
+                      if (request.url.startsWith(widget.redirectURLPattern))
             {
               var redirectURI = Uri.dataFromString(request.url);
               var ckWebAuthTokenEncoded = redirectURI.queryParameters[CKConstants.WEB_AUTH_TOKEN_PARAMETER];
@@ -60,8 +58,7 @@ class _CKAuthWebViewState extends State<CKAuthWebView>
             }
 
             return NavigationDecision.navigate;
-          },
-        );
+        })));
       })
     );
   }
